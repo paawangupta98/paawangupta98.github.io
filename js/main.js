@@ -312,16 +312,21 @@ function initAppSelector() {
   const panels = document.querySelectorAll('.app-panel');
   if (!cards.length) return;
 
+  function showApp(appId) {
+    cards.forEach(c => c.classList.remove('selected'));
+    panels.forEach(p => { p.style.display = 'none'; });
+
+    const targetCard = document.querySelector(`.app-card[data-app="${appId}"]`);
+    const targetPanel = document.getElementById(`app-${appId}`);
+    if (targetCard) targetCard.classList.add('selected');
+    if (targetPanel) targetPanel.style.display = 'block';
+  }
+
   cards.forEach(card => {
-    card.addEventListener('click', () => {
-      const target = card.dataset.app;
-      cards.forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-      panels.forEach(p => { p.classList.toggle('active', p.id === `app-${target}`); });
-    });
+    card.addEventListener('click', () => showApp(card.dataset.app));
   });
 
-  cards[0]?.click();
+  showApp(cards[0].dataset.app);
 }
 
 // ── Boot ─────────────────────────────────────────────────
