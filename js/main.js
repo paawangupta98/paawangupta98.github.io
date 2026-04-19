@@ -290,7 +290,8 @@ function initYtDownloader() {
   const saveBackend  = document.getElementById('yt-save-backend');
 
   const BACKEND_KEY = 'yt_backend_url';
-  const saved = localStorage.getItem(BACKEND_KEY) || '';
+  const DEFAULT_BACKEND = 'https://yt-downloader-api-z3ta.onrender.com';
+  const saved = localStorage.getItem(BACKEND_KEY) || DEFAULT_BACKEND;
   if (backendInput && saved) backendInput.value = saved;
 
   saveBackend?.addEventListener('click', () => {
