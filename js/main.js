@@ -275,95 +275,87 @@ function initNotes() {
   load(activeKey);
 }
 
-// ── YT Downloader (Cobalt API) ────────────────────────────
+// ── YT Downloader (Invidious API) ────────────────────────
 function initYtDownloader() {
   const btn = document.getElementById('yt-download-btn');
   if (!btn) return;
 
   const urlInput  = document.getElementById('yt-url');
-  const modeSel   = document.getElementById('yt-mode');
-  const qualSel   = document.getElementById('yt-quality');
   const statusEl  = document.getElementById('yt-status');
-  const resultEl  = document.getElementById('yt-result');
-  const dlLink    = document.getElementById('yt-download-link');
-  const apiKeyEl  = document.getElementById('yt-api-key');
-  const saveKeyBtn = document.getElementById('yt-save-key');
+  const formatsEl = document.getElementById('yt-formats');
+  const listEl    = document.getElementById('yt-format-list');
 
-  const KEY_STORE = 'cobalt_api_key';
+  const INSTANCES = [
+    'https://inv.nadeko.net',
+    'https://invidious.privacydev.net',
+    'https://iv.gg',
+    'https://invidious.nerdvpn.de',
+  ];
 
-  function loadKey() {
-    const k = localStorage.getItem(KEY_STORE) || '';
-    if (apiKeyEl) apiKeyEl.value = k;
-    return k;
+  function extractId(url) {
+    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    return m ? m[1] : null;
   }
-
-  saveKeyBtn?.addEventListener('click', () => {
-    const k = apiKeyEl.value.trim();
-    if (!k) { showToast('Paste your API key first'); return; }
-    localStorage.setItem(KEY_STORE, k);
-    showToast('API key saved!');
-  });
 
   function setStatus(msg, type) {
     statusEl.style.display = 'block';
-    resultEl.style.display = 'none';
+    formatsEl.style.display = 'none';
     statusEl.style.background = type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.04)';
-    statusEl.style.border = `1px solid ${type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}`;
-    statusEl.style.color = type === 'error' ? '#f87171' : 'var(--text-2)';
+    statusEl.style.border     = `1px solid ${type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}`;
+    statusEl.style.color      = type === 'error' ? '#f87171' : 'var(--text-2)';
     statusEl.textContent = msg;
   }
 
-  btn.addEventListener('click', async () => {
-    const url = urlInput.value.trim();
-    const apiKey = loadKey();
+  async function fetchInfo(videoId) {
+    for (const inst of INSTANCES) {
+      try {
+        const res = await fetch(`${inst}/api/v1/videos/${videoId}`, { headers: { Accept: 'application/json' } });
+        if (res.ok) return { data: await res.json(), inst };
+      } catch { /* try next */ }
+    }
+    throw new Error('All instances unreachable');
+  }
 
-    if (!url) { setStatus('Please paste a video URL first.', 'error'); return; }
-    if (!apiKey) { setStatus('Add your Cobalt API key above first — it\'s free at cobalt.tools.', 'error'); return; }
+  btn.addEventListener('click', async () => {
+    const url     = urlInput.value.trim();
+    const videoId = extractId(url);
+
+    if (!url)     { setStatus('Paste a YouTube URL first.', 'error'); return; }
+    if (!videoId) { setStatus('Not a valid YouTube URL — couldn\'t find a video ID.', 'error'); return; }
 
     btn.disabled = true;
     btn.textContent = 'Fetching…';
-    setStatus('Contacting cobalt.tools…', 'loading');
-    resultEl.style.display = 'none';
+    setStatus('Connecting to Invidious…', 'loading');
+    listEl.innerHTML = '';
 
     try {
-      const res = await fetch('https://api.cobalt.tools/', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Api-Key ${apiKey}`,
-        },
-        body: JSON.stringify({
-          url,
-          downloadMode:  modeSel.value,
-          videoQuality:  qualSel.value,
-          audioFormat:   'mp3',
-          filenameStyle: 'pretty',
-        }),
+      const { data, inst } = await fetchInfo(videoId);
+      const formats = (data.formatStreams || []).reverse(); // best quality first
+
+      if (!formats.length) { setStatus('No downloadable formats found for this video.', 'error'); return; }
+
+      statusEl.style.display = 'none';
+      formatsEl.style.display = 'block';
+
+      formats.forEach(f => {
+        const a = document.createElement('a');
+        a.href     = `${inst}/latest_version?id=${videoId}&itag=${f.itag}&local=true`;
+        a.target   = '_blank';
+        a.rel      = 'noopener';
+        a.download = '';
+        a.className = 'btn btn-outline';
+        a.style.cssText = 'text-decoration:none;font-size:0.85rem;';
+        a.textContent = f.qualityLabel || f.quality;
+        listEl.appendChild(a);
       });
 
-      const data = await res.json();
-
-      if (data.status === 'tunnel' || data.status === 'redirect') {
-        statusEl.style.display = 'none';
-        resultEl.style.display = 'block';
-        dlLink.href = data.url;
-      } else if (data.status === 'picker') {
-        statusEl.style.display = 'none';
-        resultEl.style.display = 'block';
-        dlLink.href = data.picker[0].url;
-      } else {
-        setStatus(`Error: ${data.error?.code || 'Unknown error from cobalt.'}`, 'error');
-      }
     } catch (e) {
-      setStatus('Could not reach cobalt.tools. Check your connection and try again.', 'error');
+      setStatus('Could not reach any Invidious instance. Try again in a moment.', 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download';
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Get Download Links';
     }
   });
-
-  loadKey();
 }
 
 // ── App selector ──────────────────────────────────────────

@@ -71,62 +71,30 @@
     <div class="app-panel" id="app-ytdl">
       <div style="margin-bottom:1.5rem;">
         <h2 style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:1px;margin-bottom:0.4rem;">YouTube Downloader</h2>
-        <p style="color:var(--text-2);font-size:0.9rem;">Works on YouTube, Instagram, Twitter/X, TikTok &amp; more — powered by <a href="https://cobalt.tools" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">cobalt.tools</a>.</p>
-      </div>
-
-      <!-- API Key setup -->
-      <div id="yt-key-section" style="margin-bottom:1.5rem;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:1rem 1.25rem;">
-        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">Cobalt API Key</div>
-        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
-          <input id="yt-api-key" class="form-input" type="password" placeholder="Paste your Cobalt API key…" style="flex:1;min-width:200px;" autocomplete="off" />
-          <button class="btn btn-outline" id="yt-save-key" style="white-space:nowrap;">Save Key</button>
-        </div>
-        <p style="font-size:0.78rem;color:var(--text-3);margin-top:0.6rem;">
-          Get a free key at <a href="https://cobalt.tools" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">cobalt.tools</a> → sign in → API → Generate key. Saved locally in your browser only.
-        </p>
+        <p style="color:var(--text-2);font-size:0.9rem;">Paste a YouTube URL and get direct download links — no account, no sign-in.</p>
       </div>
 
       <div class="yt-form">
         <div class="form-group">
-          <label class="form-label">Video URL</label>
+          <label class="form-label">YouTube URL</label>
           <input id="yt-url" class="form-input" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" spellcheck="false" />
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Mode</label>
-            <select id="yt-mode" class="form-select">
-              <option value="auto">Video + Audio</option>
-              <option value="audio">Audio Only</option>
-              <option value="mute">Video Only (no audio)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Quality</label>
-            <select id="yt-quality" class="form-select">
-              <option value="max">Best Available</option>
-              <option value="1080">1080p</option>
-              <option value="720">720p</option>
-              <option value="480">480p</option>
-              <option value="360">360p</option>
-            </select>
-          </div>
         </div>
 
         <button class="btn btn-primary" id="yt-download-btn" style="width:100%;justify-content:center;font-size:1rem;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download
+          Get Download Links
         </button>
 
         <div id="yt-status" style="display:none;border-radius:8px;padding:1rem 1.25rem;font-size:0.9rem;line-height:1.6;"></div>
 
-        <div id="yt-result" style="display:none;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:8px;padding:1.25rem;text-align:center;">
-          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1.5px;text-transform:uppercase;color:#4ade80;margin-bottom:0.75rem;">Ready to Download</div>
-          <a id="yt-download-link" href="#" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;justify-content:center;text-decoration:none;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Click to Save File
-          </a>
-          <p style="color:var(--text-3);font-size:0.75rem;margin-top:0.75rem;">If download doesn't start, right-click → Save Link As</p>
+        <div id="yt-formats" style="display:none;">
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1.5px;text-transform:uppercase;color:#4ade80;margin-bottom:0.75rem;">Choose Quality</div>
+          <div id="yt-format-list" style="display:flex;flex-wrap:wrap;gap:0.6rem;"></div>
+          <p style="color:var(--text-3);font-size:0.75rem;margin-top:0.75rem;">Links expire in ~6 hours. Right-click → Save Link As if download doesn't start.</p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:0.9rem 1.1rem;font-size:0.82rem;color:var(--text-2);line-height:1.6;">
+          Powered by <a href="https://invidious.io" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">Invidious</a> — open-source, no tracking. Combined (audio+video) formats only; max 720p.
         </div>
       </div>
     </div>
