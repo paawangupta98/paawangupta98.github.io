@@ -277,29 +277,17 @@ function initNotes() {
 
 // ── YT Downloader ────────────────────────────────────────
 function initYtDownloader() {
-  const btn         = document.getElementById('yt-download-btn');
+  const btn      = document.getElementById('yt-download-btn');
   if (!btn) return;
 
-  const urlInput    = document.getElementById('yt-url');
-  const modeSel     = document.getElementById('yt-mode');
-  const qualSel     = document.getElementById('yt-quality');
-  const statusEl    = document.getElementById('yt-status');
-  const resultEl    = document.getElementById('yt-result');
-  const dlLink      = document.getElementById('yt-download-link');
-  const backendInput = document.getElementById('yt-backend-url');
-  const saveBackend  = document.getElementById('yt-save-backend');
+  const urlInput = document.getElementById('yt-url');
+  const modeSel  = document.getElementById('yt-mode');
+  const qualSel  = document.getElementById('yt-quality');
+  const statusEl = document.getElementById('yt-status');
+  const resultEl = document.getElementById('yt-result');
+  const dlLink   = document.getElementById('yt-download-link');
 
-  const BACKEND_KEY = 'yt_backend_url';
-  const DEFAULT_BACKEND = 'https://yt-downloader-api-z3ta.onrender.com';
-  const saved = localStorage.getItem(BACKEND_KEY) || DEFAULT_BACKEND;
-  if (backendInput && saved) backendInput.value = saved;
-
-  saveBackend?.addEventListener('click', () => {
-    const v = backendInput.value.trim().replace(/\/$/, '');
-    if (!v) { showToast('Paste your Render URL first'); return; }
-    localStorage.setItem(BACKEND_KEY, v);
-    showToast('Backend URL saved!');
-  });
+  const BACKEND = 'https://yt-downloader-api-z3ta.onrender.com';
 
   function setStatus(msg, type) {
     statusEl.style.display = 'block';
@@ -311,18 +299,15 @@ function initYtDownloader() {
   }
 
   btn.addEventListener('click', async () => {
-    const url      = urlInput.value.trim();
-    const backend  = (localStorage.getItem(BACKEND_KEY) || '').replace(/\/$/, '');
-
-    if (!url)     { setStatus('Paste a video URL first.', 'error'); return; }
-    if (!backend) { setStatus('Add your Render backend URL in the field below first.', 'error'); return; }
+    const url = urlInput.value.trim();
+    if (!url) { setStatus('Paste a video URL first.', 'error'); return; }
 
     btn.disabled    = true;
     btn.textContent = 'Fetching…';
-    setStatus('Contacting backend…', 'loading');
+    setStatus('Contacting backend… (may take ~30s if server is waking up)', 'loading');
 
     try {
-      const res  = await fetch(`${backend}/download`, {
+      const res = await fetch(`${BACKEND}/download`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ url, quality: qualSel.value, mode: modeSel.value }),
@@ -334,15 +319,15 @@ function initYtDownloader() {
         return;
       }
 
-      const blob     = await res.blob();
-      const blobUrl  = URL.createObjectURL(blob);
+      const blob    = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
       statusEl.style.display = 'none';
       resultEl.style.display = 'block';
-      dlLink.href    = blobUrl;
+      dlLink.href = blobUrl;
       dlLink.click();
 
     } catch (e) {
-      setStatus('Could not reach the backend. Is your Render URL correct?', 'error');
+      setStatus('Could not reach the backend. Check your connection and try again.', 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download';
