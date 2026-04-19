@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games — Paawan Gupta</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23e23636'/><text y='.9em' font-size='72' font-family='Arial Black' fill='white' x='12'>P</text></svg>" />
+  <style>
+    /* ── Puzzle ── */
+    .puzzle-wrap { display:flex; flex-direction:column; align-items:flex-start; gap:1.25rem; }
+    .puzzle-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; width:300px; max-width:100%; }
+    .puzzle-tile {
+      aspect-ratio:1; background:var(--bg-3); border:1px solid var(--border);
+      border-radius:8px; display:flex; align-items:center; justify-content:center;
+      font-family:'Bebas Neue',sans-serif; font-size:1.7rem; color:var(--text-1);
+      cursor:pointer; transition:var(--transition); user-select:none;
+    }
+    .puzzle-tile:hover:not(.empty) { border-color:var(--border-red); color:var(--red); transform:scale(1.04); }
+    .puzzle-tile.empty { background:transparent; border-color:transparent; cursor:default; }
+    .puzzle-solved .puzzle-tile { background:rgba(34,197,94,.1); border-color:rgba(34,197,94,.3); color:#4ade80; }
+
+    /* ── Sudoku ── */
+    .sudoku-wrap { display:flex; flex-direction:column; gap:1rem; align-items:flex-start; }
+    .sudoku-grid { display:grid; grid-template-columns:repeat(9,44px); border:2px solid var(--text-2); }
+    .s-cell {
+      width:44px; height:44px; border-right:1px solid rgba(255,255,255,.1);
+      border-bottom:1px solid rgba(255,255,255,.1);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .s-cell.rb { border-right:2px solid var(--text-2); }
+    .s-cell.bb { border-bottom:2px solid var(--text-2); }
+    .s-cell input {
+      width:100%; height:100%; background:transparent; border:none; outline:none;
+      text-align:center; font-family:'Rajdhani',sans-serif; font-weight:700;
+      font-size:1.05rem; color:var(--red); caret-color:var(--red);
+    }
+    .s-cell input::-webkit-inner-spin-button { display:none; }
+    .s-cell.pre { background:rgba(255,255,255,.04); }
+    .s-cell.pre span { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:1.05rem; color:var(--text-1); }
+    .s-cell.err { background:rgba(239,68,68,.15); }
+    .s-cell.ok  { background:rgba(34,197,94,.1); }
+    @media(max-width:500px){
+      .sudoku-grid { grid-template-columns:repeat(9,36px); }
+      .s-cell { width:36px; height:36px; }
+    }
+
+    /* ── KBC ── */
+    .kbc-wrap { max-width:720px; }
+    .kbc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem; }
+    .kbc-prize-now { font-family:'Bebas Neue',sans-serif; font-size:2rem; color:var(--gold); letter-spacing:2px; }
+    .kbc-qnum { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; color:var(--text-3); }
+    .kbc-question {
+      background:rgba(201,168,76,.07); border:1px solid rgba(201,168,76,.25);
+      border-radius:var(--radius); padding:1.25rem 1.5rem; margin-bottom:1.25rem;
+      font-family:'Rajdhani',sans-serif; font-weight:600; font-size:1.1rem; line-height:1.6; color:var(--text-1);
+    }
+    .kbc-options { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:1.25rem; }
+    .kbc-opt {
+      display:flex; align-items:center; gap:0.65rem; background:var(--bg-3);
+      border:1px solid var(--border); border-radius:8px; padding:0.7rem 1rem;
+      cursor:pointer; transition:var(--transition); font-family:'Rajdhani',sans-serif;
+      font-weight:600; font-size:0.95rem; color:var(--text-1); text-align:left; width:100%;
+    }
+    .kbc-opt:hover:not([disabled]) { border-color:var(--gold); background:rgba(201,168,76,.08); }
+    .kbc-opt .lbl { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--gold); min-width:22px; }
+    .kbc-opt.correct { border-color:#4ade80; background:rgba(34,197,94,.1); color:#4ade80; }
+    .kbc-opt.wrong   { border-color:#f87171; background:rgba(239,68,68,.1); color:#f87171; }
+    .kbc-opt.gone    { opacity:.2; pointer-events:none; }
+    .kbc-lifelines { display:flex; gap:0.6rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+    .kbc-ll {
+      font-family:'Rajdhani',sans-serif; font-weight:700; font-size:0.78rem;
+      letter-spacing:1px; text-transform:uppercase; padding:0.35rem 0.85rem;
+      border-radius:6px; border:1px solid var(--border-red); background:rgba(226,54,54,.08);
+      color:var(--red); cursor:pointer; transition:var(--transition);
+    }
+    .kbc-ll:hover:not([disabled]) { background:rgba(226,54,54,.2); }
+    .kbc-ll[disabled] { opacity:.3; cursor:not-allowed; }
+    .kbc-ladder { display:flex; flex-direction:column-reverse; gap:2px; margin-top:1rem; }
+    .kbc-lv {
+      display:flex; justify-content:space-between; padding:0.28rem 0.75rem;
+      border-radius:4px; font-family:'Rajdhani',sans-serif; font-size:0.78rem;
+      font-weight:600; color:var(--text-3); transition:var(--transition);
+    }
+    .kbc-lv.cur { background:rgba(226,54,54,.15); color:var(--red); font-weight:700; }
+    .kbc-lv.safe { color:var(--gold); }
+    .kbc-lv.done { color:var(--text-2); }
+    .kbc-msg {
+      border-radius:var(--radius); padding:1.25rem; text-align:center;
+      font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:2px;
+      display:none;
+    }
+    .kbc-msg.win  { background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.3); color:#4ade80; }
+    .kbc-msg.lose { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.3); color:#f87171; }
+    @media(max-width:540px){ .kbc-options { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="logo-mark">PG</span>PAAWAN GUPTA</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="apps.html">Apps</a></li>
+      <li><a href="games.html" class="active">Games</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="resume.html">Resume</a></li>
+      <li><a href="blog.html">Blog</a></li>
+    </ul>
+    <a href="https://github.com/paawangupta98" target="_blank" class="nav-github" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+      GitHub
+    </a>
+    <div class="hamburger"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="apps.html">Apps</a>
+  <a href="games.html" class="active">Games</a>
+  <a href="projects.html">Projects</a>
+  <a href="resume.html">Resume</a>
+  <a href="blog.html">Blog</a>
+</div>
+
+<main class="page">
+  <section class="section">
+    <div class="section-label">Game Zone</div>
+    <h1 class="section-title fade-in">Mini Games</h1>
+    <p class="section-desc fade-in">Browser-based games to kill time. All local — no server, no ads.</p>
+
+    <div class="apps-selector fade-in">
+      <div class="app-card" data-app="puzzle">
+        <div class="app-icon">🧩</div>
+        <div class="app-name">Sliding Puzzle</div>
+        <div class="app-desc">15-tile sliding puzzle</div>
+      </div>
+      <div class="app-card" data-app="sudoku">
+        <div class="app-icon">🔢</div>
+        <div class="app-name">Sudoku</div>
+        <div class="app-desc">Classic 9×9 Sudoku</div>
+      </div>
+      <div class="app-card" data-app="kbc">
+        <div class="app-icon">💰</div>
+        <div class="app-name">KBC</div>
+        <div class="app-desc">Kaun Banega Crorepati</div>
+      </div>
+    </div>
+
+    <!-- ── Sliding Puzzle ── -->
+    <div class="app-panel" id="app-puzzle">
+      <div style="margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <h2 style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.3rem;letter-spacing:1px;">Sliding Puzzle</h2>
+          <p style="color:var(--text-2);font-size:0.85rem;">Arrange tiles 1–15 in order. Click a tile next to the empty space to slide it.</p>
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:center;">
+          <span id="puzzle-moves" style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--red);">0</span>
+          <span style="font-family:'Rajdhani',sans-serif;font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);">moves</span>
+          <button class="btn btn-outline" id="puzzle-shuffle" style="font-size:0.8rem;">Shuffle</button>
+        </div>
+      </div>
+      <div class="puzzle-wrap">
+        <div class="puzzle-grid" id="puzzle-grid"></div>
+        <div id="puzzle-win" style="display:none;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:#4ade80;">
+          SOLVED! 🎉
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Sudoku ── -->
+    <div class="app-panel" id="app-sudoku">
+      <div style="margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <h2 style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.3rem;letter-spacing:1px;">Sudoku</h2>
+          <p style="color:var(--text-2);font-size:0.85rem;">Fill every row, column, and 3×3 box with digits 1–9.</p>
+        </div>
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+          <button class="btn btn-outline" id="sudoku-check" style="font-size:0.8rem;">Check</button>
+          <button class="btn btn-outline" id="sudoku-new" style="font-size:0.8rem;">New Game</button>
+        </div>
+      </div>
+      <div class="sudoku-wrap">
+        <div class="sudoku-grid" id="sudoku-grid"></div>
+        <div id="sudoku-msg" style="display:none;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.95rem;letter-spacing:1px;padding:0.6rem 1rem;border-radius:6px;margin-top:0.5rem;"></div>
+      </div>
+    </div>
+
+    <!-- ── KBC ── -->
+    <div class="app-panel" id="app-kbc">
+      <div class="kbc-wrap">
+        <div id="kbc-start" style="text-align:center;padding:2rem 0;">
+          <div style="font-size:3rem;margin-bottom:1rem;">💰</div>
+          <h2 style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:3px;margin-bottom:0.5rem;">Kaun Banega Crorepati</h2>
+          <p style="color:var(--text-2);margin-bottom:2rem;">15 questions · 3 lifelines · ₹1 Crore jackpot</p>
+          <button class="btn btn-primary" id="kbc-play" style="font-size:1rem;">Start Playing</button>
+        </div>
+
+        <div id="kbc-game" style="display:none;">
+          <div class="kbc-header">
+            <div>
+              <div class="kbc-qnum" id="kbc-qnum">Question 1 of 15</div>
+              <div class="kbc-prize-now" id="kbc-prize-now">₹0</div>
+            </div>
+            <div class="kbc-lifelines">
+              <button class="kbc-ll" id="ll-5050">50 : 50</button>
+              <button class="kbc-ll" id="ll-phone">📞 Phone</button>
+              <button class="kbc-ll" id="ll-audience">👥 Audience</button>
+            </div>
+          </div>
+
+          <div class="kbc-question" id="kbc-question">Loading…</div>
+
+          <div class="kbc-options" id="kbc-options"></div>
+
+          <div id="ll-hint" style="display:none;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:0.85rem 1.1rem;font-size:0.9rem;color:var(--gold);margin-bottom:1rem;"></div>
+
+          <div class="kbc-ladder" id="kbc-ladder"></div>
+
+          <div class="kbc-msg win"  id="kbc-win"></div>
+          <div class="kbc-msg lose" id="kbc-lose"></div>
+
+          <button class="btn btn-outline" id="kbc-restart" style="display:none;margin-top:1rem;">Play Again</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Built with ❤ by <a href="index.html">Paawan Gupta</a> &nbsp;·&nbsp; Hosted on GitHub Pages</p>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+// ═══════════════════════════════════════════════
+//  SLIDING PUZZLE
+// ═══════════════════════════════════════════════
+(function() {
+  const grid = document.getElementById('puzzle-grid');
+  if (!grid) return;
+  const movesEl = document.getElementById('puzzle-moves');
+  const winEl   = document.getElementById('puzzle-win');
+  let tiles = [], moves = 0;
+
+  function render() {
+    const solved = tiles.every((v,i) => v === (i === 15 ? 0 : i + 1));
+    grid.innerHTML = '';
+    if (solved) grid.parentElement.classList.add('puzzle-solved');
+    else grid.parentElement.classList.remove('puzzle-solved');
+    winEl.style.display = solved ? 'block' : 'none';
+
+    tiles.forEach((v, i) => {
+      const d = document.createElement('div');
+      d.className = 'puzzle-tile' + (v === 0 ? ' empty' : '');
+      d.textContent = v || '';
+      if (v !== 0) d.addEventListener('click', () => tryMove(i));
+      grid.appendChild(d);
+    });
+    movesEl.textContent = moves;
+  }
+
+  function tryMove(idx) {
+    const empty = tiles.indexOf(0);
+    const row = r => Math.floor(r / 4), col = c => c % 4;
+    const adj = Math.abs(row(idx) - row(empty)) + Math.abs(col(idx) - col(empty)) === 1;
+    if (!adj) return;
+    [tiles[idx], tiles[empty]] = [tiles[empty], tiles[idx]];
+    moves++;
+    render();
+  }
+
+  function shuffle() {
+    tiles = [...Array(15).keys()].map(i => i + 1).concat(0);
+    moves = 0;
+    const empty = () => tiles.indexOf(0);
+    for (let i = 0; i < 200; i++) {
+      const e = empty(), r = Math.floor(e / 4), c = e % 4;
+      const neighbors = [];
+      if (r > 0) neighbors.push(e - 4);
+      if (r < 3) neighbors.push(e + 4);
+      if (c > 0) neighbors.push(e - 1);
+      if (c < 3) neighbors.push(e + 1);
+      const pick = neighbors[Math.floor(Math.random() * neighbors.length)];
+      [tiles[e], tiles[pick]] = [tiles[pick], tiles[e]];
+    }
+    render();
+  }
+
+  document.getElementById('puzzle-shuffle').addEventListener('click', shuffle);
+  shuffle();
+})();
+
+// ═══════════════════════════════════════════════
+//  SUDOKU
+// ═══════════════════════════════════════════════
+(function() {
+  const gridEl = document.getElementById('sudoku-grid');
+  if (!gridEl) return;
+
+  const PUZZLES = [
+    { p:[[5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],[8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],[0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]],
+      s:[[5,3,4,6,7,8,9,1,2],[6,7,2,1,9,5,3,4,8],[1,9,8,3,4,2,5,6,7],[8,5,9,7,6,1,4,2,3],[4,2,6,8,5,3,7,9,1],[7,1,3,9,2,4,8,5,6],[9,6,1,5,3,7,2,8,4],[2,8,7,4,1,9,6,3,5],[3,4,5,2,8,6,1,7,9]] },
+    { p:[[0,0,0,2,6,0,7,0,1],[6,8,0,0,7,0,0,9,0],[1,9,0,0,0,4,5,0,0],[8,2,0,1,0,0,0,4,0],[0,0,4,6,0,2,9,0,0],[0,5,0,0,0,3,0,2,8],[0,0,9,3,0,0,0,7,4],[0,4,0,0,5,0,0,3,6],[7,0,3,0,1,8,0,0,0]],
+      s:[[4,3,5,2,6,9,7,8,1],[6,8,2,5,7,1,4,9,3],[1,9,7,8,3,4,5,6,2],[8,2,6,1,9,5,3,4,7],[3,7,4,6,8,2,9,1,5],[9,5,1,7,4,3,6,2,8],[5,1,9,3,2,6,8,7,4],[2,4,8,9,5,7,1,3,6],[7,6,3,4,1,8,2,5,9]] },
+    { p:[[0,2,0,6,0,8,0,0,0],[5,8,0,0,0,9,7,0,0],[0,0,0,0,4,0,0,0,0],[3,7,0,0,0,0,5,0,0],[6,0,0,0,0,0,0,0,4],[0,0,8,0,0,0,0,1,3],[0,0,0,0,2,0,0,0,0],[0,0,9,8,0,0,0,3,6],[0,0,0,3,0,6,0,9,0]],
+      s:[[1,2,3,6,7,8,9,4,5],[5,8,4,2,3,9,7,6,1],[9,6,7,1,4,5,3,2,8],[3,7,2,4,6,1,5,8,9],[6,9,1,5,8,3,2,7,4],[4,5,8,7,9,2,6,1,3],[7,3,6,9,2,4,1,5,8],[2,1,9,8,5,7,4,3,6],[8,4,5,3,1,6,7,9,2]] },
+    { p:[[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,3,0,8,5],[0,0,1,0,2,0,0,0,0],[0,0,0,5,0,7,0,0,0],[0,0,4,0,0,0,1,0,0],[0,9,0,0,0,0,0,0,0],[5,0,0,0,0,0,0,7,3],[0,0,2,0,1,0,0,0,0],[0,0,0,0,4,0,0,0,9]],
+      s:[[9,8,7,6,5,4,3,2,1],[2,4,6,1,7,3,9,8,5],[3,5,1,9,2,8,7,4,6],[1,2,8,5,3,7,6,9,4],[6,3,4,8,9,2,1,5,7],[7,9,5,4,6,1,8,3,2],[5,1,9,2,8,6,4,7,3],[4,7,2,3,1,9,5,6,8],[8,6,3,7,4,5,2,1,9]] },
+    { p:[[1,0,0,4,8,9,0,0,6],[7,3,0,0,0,0,0,4,0],[0,0,0,0,0,1,2,9,5],[0,0,7,1,2,0,6,0,0],[5,0,0,7,0,3,0,0,8],[0,0,6,0,9,5,7,0,0],[9,1,4,6,0,0,0,0,0],[0,2,0,0,0,0,0,3,7],[8,0,0,5,1,2,0,0,4]],
+      s:[[1,5,2,4,8,9,3,7,6],[7,3,9,2,5,6,8,4,1],[4,6,8,3,7,1,2,9,5],[3,8,7,1,2,4,6,5,9],[5,9,1,7,6,3,4,2,8],[2,4,6,8,9,5,7,1,3],[9,1,4,6,3,7,5,8,2],[6,2,5,9,4,8,1,3,7],[8,7,3,5,1,2,9,6,4]] },
+  ];
+
+  let current = null;
+
+  function buildGrid(puzzle) {
+    current = puzzle;
+    gridEl.innerHTML = '';
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        const cell = document.createElement('div');
+        cell.className = 's-cell';
+        cell.dataset.r = r; cell.dataset.c = c;
+        if (c === 2 || c === 5) cell.classList.add('rb');
+        if (r === 2 || r === 5) cell.classList.add('bb');
+        const v = puzzle.p[r][c];
+        if (v) {
+          cell.classList.add('pre');
+          const s = document.createElement('span');
+          s.textContent = v;
+          cell.appendChild(s);
+        } else {
+          const inp = document.createElement('input');
+          inp.type = 'number'; inp.min = 1; inp.max = 9;
+          inp.addEventListener('input', () => {
+            let val = parseInt(inp.value);
+            if (isNaN(val) || val < 1 || val > 9) inp.value = '';
+            else inp.value = val;
+          });
+          cell.appendChild(inp);
+        }
+        gridEl.appendChild(cell);
+      }
+    }
+    document.getElementById('sudoku-msg').style.display = 'none';
+  }
+
+  function check() {
+    const cells = gridEl.querySelectorAll('.s-cell');
+    let allFilled = true, allCorrect = true;
+    cells.forEach(cell => {
+      cell.classList.remove('err','ok');
+      const r = +cell.dataset.r, c = +cell.dataset.c;
+      const correct = current.s[r][c];
+      if (cell.classList.contains('pre')) return;
+      const inp = cell.querySelector('input');
+      const val = parseInt(inp?.value);
+      if (!val) { allFilled = false; return; }
+      if (val === correct) cell.classList.add('ok');
+      else { cell.classList.add('err'); allCorrect = false; }
+    });
+    const msg = document.getElementById('sudoku-msg');
+    msg.style.display = 'block';
+    if (!allFilled) {
+      msg.style.background = 'rgba(255,255,255,.05)'; msg.style.color = 'var(--text-2)';
+      msg.textContent = 'Keep going — some cells are still empty.';
+    } else if (allCorrect) {
+      msg.style.background = 'rgba(34,197,94,.1)'; msg.style.color = '#4ade80';
+      msg.textContent = '✓ Solved! Well done.';
+    } else {
+      msg.style.background = 'rgba(239,68,68,.08)'; msg.style.color = '#f87171';
+      msg.textContent = 'Some cells are incorrect — highlighted in red.';
+    }
+  }
+
+  document.getElementById('sudoku-check').addEventListener('click', check);
+  document.getElementById('sudoku-new').addEventListener('click', () => {
+    buildGrid(PUZZLES[Math.floor(Math.random() * PUZZLES.length)]);
+  });
+  buildGrid(PUZZLES[0]);
+})();
+
+// ═══════════════════════════════════════════════
+//  KBC
+// ═══════════════════════════════════════════════
+(function() {
+  if (!document.getElementById('kbc-game')) return;
+
+  const PRIZES = ['₹1,000','₹2,000','₹3,000','₹5,000','₹10,000','₹20,000','₹40,000','₹80,000','₹1,60,000','₹3,20,000','₹6,40,000','₹12,50,000','₹25,00,000','₹50,00,000','₹1,00,00,000'];
+  const SAFE   = [4, 9]; // indices (0-based) that are safe havens (₹10k, ₹3.2L)
+
+  const QUESTIONS = [
+    {q:'What is the capital of India?', o:['Mumbai','New Delhi','Kolkata','Chennai'], a:1},
+    {q:'How many days are there in a leap year?', o:['365','366','367','368'], a:1},
+    {q:'What is the national bird of India?', o:['Sparrow','Eagle','Peacock','Parrot'], a:2},
+    {q:'How many players are there in a cricket team?', o:['9','10','11','12'], a:2},
+    {q:'Who was the first Prime Minister of India?', o:['Mahatma Gandhi','Sardar Patel','B.R. Ambedkar','Jawaharlal Nehru'], a:3},
+    {q:'What is the chemical formula for water?', o:['CO₂','O₂','H₂O','NaCl'], a:2},
+    {q:'In which year did India gain independence?', o:['1945','1946','1947','1948'], a:2},
+    {q:'What is the largest planet in our solar system?', o:['Saturn','Mars','Neptune','Jupiter'], a:3},
+    {q:'Who painted the Mona Lisa?', o:['Michelangelo','Picasso','Van Gogh','Leonardo da Vinci'], a:3},
+    {q:'What is the national animal of India?', o:['Lion','Elephant','Bengal Tiger','Leopard'], a:2},
+    {q:'Which planet is known as the Red Planet?', o:['Venus','Mars','Jupiter','Saturn'], a:1},
+    {q:'Who invented the telephone?', o:['Thomas Edison','Nikola Tesla','Alexander Graham Bell','Marconi'], a:2},
+    {q:'What is the square root of 144?', o:['11','12','13','14'], a:1},
+    {q:'How many bones are in the adult human body?', o:['196','206','216','226'], a:1},
+    {q:'Which is the longest river in the world?', o:['Amazon','Yangtze','Nile','Mississippi'], a:2},
+    {q:'What is the speed of light (approx)?', o:['3×10⁵ km/s','3×10⁶ km/s','3×10⁴ km/s','3×10⁷ km/s'], a:0},
+    {q:'Who wrote "Romeo and Juliet"?', o:['Charles Dickens','William Shakespeare','Jane Austen','Mark Twain'], a:1},
+    {q:'What is the currency of Japan?', o:['Yuan','Won','Yen','Peso'], a:2},
+    {q:'In what year did the first moon landing occur?', o:['1965','1967','1971','1969'], a:3},
+    {q:'Which element has the chemical symbol Au?', o:['Silver','Copper','Gold','Aluminum'], a:2},
+    {q:'Who is known as the Father of the Indian Constitution?', o:['Nehru','Gandhi','Sardar Patel','B.R. Ambedkar'], a:3},
+    {q:'What does "www" stand for in a website?', o:['World Wide Web','Wide World Web','Web World Wide','World Web Work'], a:0},
+    {q:'How many chromosomes does a normal human cell have?', o:['23','44','46','48'], a:2},
+    {q:'What is the Fibonacci number after 21?', o:['29','32','34','33'], a:2},
+    {q:'Which is the largest ocean on Earth?', o:['Atlantic','Indian','Arctic','Pacific'], a:3},
+    {q:'What is 17 × 13?', o:['211','221','231','201'], a:1},
+    {q:'Who wrote the Mahabharata?', o:['Valmiki','Tulsidas','Vyasa','Kalidas'], a:2},
+    {q:'What is the chemical symbol for Iron?', o:['Ir','In','Fe','Fo'], a:2},
+    {q:'The Great Wall of China was built to protect against which group?', o:['Mongols','Romans','Persians','Vikings'], a:0},
+    {q:'What is the smallest prime number?', o:['0','1','2','3'], a:2},
+  ];
+
+  let qIdx = 0, score = 0, questions = [], lifelines = {ff:false, ph:false, au:false};
+
+  function shuffle(arr) { return [...arr].sort(()=>Math.random()-0.5); }
+
+  function start() {
+    document.getElementById('kbc-start').style.display = 'none';
+    document.getElementById('kbc-game').style.display  = 'block';
+    qIdx = 0; score = 0;
+    lifelines = {ff:false, ph:false, au:false};
+    questions = shuffle(QUESTIONS).slice(0, 15);
+    ['ll-5050','ll-phone','ll-audience'].forEach(id => {
+      const b = document.getElementById(id); b.disabled = false; b.style.opacity = '';
+    });
+    buildLadder();
+    showQ();
+  }
+
+  function buildLadder() {
+    const l = document.getElementById('kbc-ladder');
+    l.innerHTML = '';
+    PRIZES.forEach((p, i) => {
+      const d = document.createElement('div');
+      d.className = 'kbc-lv' + (SAFE.includes(i) ? ' safe' : '');
+      d.id = 'kbc-lv-' + i;
+      d.innerHTML = `<span>${i+1}</span><span>${p}</span>`;
+      l.appendChild(d);
+    });
+    updateLadder();
+  }
+
+  function updateLadder() {
+    PRIZES.forEach((_, i) => {
+      const el = document.getElementById('kbc-lv-' + i);
+      el.classList.remove('cur','done');
+      if (i === qIdx) el.classList.add('cur');
+      else if (i < qIdx) el.classList.add('done');
+    });
+    document.getElementById('kbc-qnum').textContent    = `Question ${qIdx + 1} of 15`;
+    document.getElementById('kbc-prize-now').textContent = qIdx > 0 ? PRIZES[qIdx-1] : '₹0';
+  }
+
+  function showQ() {
+    document.getElementById('kbc-win').style.display  = 'none';
+    document.getElementById('kbc-lose').style.display = 'none';
+    document.getElementById('kbc-restart').style.display = 'none';
+    document.getElementById('ll-hint').style.display  = 'none';
+    updateLadder();
+    const q = questions[qIdx];
+    document.getElementById('kbc-question').textContent = q.q;
+    const opts = document.getElementById('kbc-options');
+    opts.innerHTML = '';
+    q.o.forEach((o, i) => {
+      const b = document.createElement('button');
+      b.className = 'kbc-opt';
+      b.innerHTML = `<span class="lbl">${'ABCD'[i]}</span> ${o}`;
+      b.dataset.idx = i;
+      b.addEventListener('click', () => answer(i));
+      opts.appendChild(b);
+    });
+  }
+
+  function answer(chosen) {
+    const q = questions[qIdx];
+    const opts = document.querySelectorAll('.kbc-opt');
+    opts.forEach(b => b.disabled = true);
+    ['ll-5050','ll-phone','ll-audience'].forEach(id => document.getElementById(id).disabled = true);
+
+    const correct = q.a;
+    opts[correct].classList.add('correct');
+    if (chosen !== correct) {
+      opts[chosen].classList.add('wrong');
+      setTimeout(() => endGame(false), 1200);
+    } else {
+      setTimeout(() => {
+        if (qIdx === 14) { endGame(true); return; }
+        qIdx++;
+        showQ();
+      }, 900);
+    }
+  }
+
+  function endGame(won) {
+    const safeIdx = SAFE.filter(i => i < qIdx).pop();
+    const safePrize = safeIdx !== undefined ? PRIZES[safeIdx] : '₹0';
+    if (won) {
+      const w = document.getElementById('kbc-win');
+      w.style.display = 'block';
+      w.textContent   = '🎉 Congratulations! You won ₹1,00,00,000!';
+    } else {
+      const l = document.getElementById('kbc-lose');
+      l.style.display = 'block';
+      l.textContent   = `Wrong! You take home ${safePrize}`;
+    }
+    document.getElementById('kbc-restart').style.display = 'block';
+  }
+
+  // Lifelines
+  document.getElementById('ll-5050').addEventListener('click', () => {
+    if (lifelines.ff) return;
+    lifelines.ff = true;
+    document.getElementById('ll-5050').disabled = true;
+    const q = questions[qIdx];
+    const opts = document.querySelectorAll('.kbc-opt');
+    let removed = 0;
+    for (let i = 0; i < 4 && removed < 2; i++) {
+      if (i !== q.a) { opts[i].classList.add('gone'); removed++; }
+    }
+  });
+
+  document.getElementById('ll-phone').addEventListener('click', () => {
+    if (lifelines.ph) return;
+    lifelines.ph = true;
+    document.getElementById('ll-phone').disabled = true;
+    const q = questions[qIdx];
+    const hint = document.getElementById('ll-hint');
+    hint.style.display = 'block';
+    hint.textContent = `📞 Your friend says: "I'm pretty sure it's '${q.o[q.a]}'!"`;
+  });
+
+  document.getElementById('ll-audience').addEventListener('click', () => {
+    if (lifelines.au) return;
+    lifelines.au = true;
+    document.getElementById('ll-audience').disabled = true;
+    const q = questions[qIdx];
+    const hint = document.getElementById('ll-hint');
+    hint.style.display = 'block';
+    const pcts = [0,0,0,0].map((_,i) => i === q.a ? 72 + Math.floor(Math.random()*10) : Math.floor(Math.random()*10));
+    const total = pcts.reduce((a,b)=>a+b,0);
+    const norm  = pcts.map(p => Math.round(p/total*100));
+    hint.innerHTML = '👥 Audience Poll:<br>' +
+      norm.map((p,i) => `<b style="color:var(--gold)">${'ABCD'[i]}</b> ${'█'.repeat(Math.round(p/5))} ${p}%`).join('  ·  ');
+  });
+
+  document.getElementById('kbc-play').addEventListener('click', start);
+  document.getElementById('kbc-restart').addEventListener('click', start);
+})();
+</script>
+</body>
+</html>
