@@ -277,43 +277,76 @@ function initNotes() {
 
 // ── YT Downloader ────────────────────────────────────────
 function initYtDownloader() {
-  const urlInput  = document.getElementById('yt-url');
-  const qualSel   = document.getElementById('yt-quality');
-  const fmtSel    = document.getElementById('yt-format');
-  const cmdText   = document.getElementById('yt-cmd-text');
-  const copyBtn   = document.getElementById('copy-cmd');
-  const cobaltBtn = document.getElementById('yt-cobalt-btn');
-  if (!urlInput) return;
+  const btn         = document.getElementById('yt-download-btn');
+  if (!btn) return;
 
-  function buildCmd() {
-    const url     = urlInput.value.trim() || 'YOUR_URL_HERE';
-    const quality = qualSel?.value || 'best';
-    const fmt     = fmtSel?.value  || 'mp4';
-    let cmd;
-    if (quality === 'audio') {
-      cmd = `yt-dlp -x --audio-format mp3 "${url}"`;
-    } else if (quality === 'best') {
-      cmd = `yt-dlp -f "bestvideo+bestaudio" --merge-output-format ${fmt} "${url}"`;
-    } else {
-      cmd = `yt-dlp -f "bestvideo[height<=${quality}]+bestaudio" --merge-output-format ${fmt} "${url}"`;
-    }
-    if (cmdText) cmdText.textContent = cmd;
-  }
+  const urlInput    = document.getElementById('yt-url');
+  const modeSel     = document.getElementById('yt-mode');
+  const qualSel     = document.getElementById('yt-quality');
+  const statusEl    = document.getElementById('yt-status');
+  const resultEl    = document.getElementById('yt-result');
+  const dlLink      = document.getElementById('yt-download-link');
+  const backendInput = document.getElementById('yt-backend-url');
+  const saveBackend  = document.getElementById('yt-save-backend');
 
-  urlInput.addEventListener('input', buildCmd);
-  qualSel?.addEventListener('change', buildCmd);
-  fmtSel?.addEventListener('change', buildCmd);
-  copyBtn?.addEventListener('click', () => copyText(cmdText?.textContent || ''));
+  const BACKEND_KEY = 'yt_backend_url';
+  const saved = localStorage.getItem(BACKEND_KEY) || '';
+  if (backendInput && saved) backendInput.value = saved;
 
-  cobaltBtn?.addEventListener('click', () => {
-    const url = urlInput.value.trim();
-    if (!url) { showToast('Paste a URL first'); return; }
-    copyText(url);
-    showToast('URL copied! Paste it on cobalt.tools');
-    setTimeout(() => window.open('https://cobalt.tools', '_blank', 'noopener'), 600);
+  saveBackend?.addEventListener('click', () => {
+    const v = backendInput.value.trim().replace(/\/$/, '');
+    if (!v) { showToast('Paste your Render URL first'); return; }
+    localStorage.setItem(BACKEND_KEY, v);
+    showToast('Backend URL saved!');
   });
 
-  buildCmd();
+  function setStatus(msg, type) {
+    statusEl.style.display = 'block';
+    resultEl.style.display = 'none';
+    statusEl.style.background = type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.04)';
+    statusEl.style.border     = `1px solid ${type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}`;
+    statusEl.style.color      = type === 'error' ? '#f87171' : 'var(--text-2)';
+    statusEl.textContent      = msg;
+  }
+
+  btn.addEventListener('click', async () => {
+    const url      = urlInput.value.trim();
+    const backend  = (localStorage.getItem(BACKEND_KEY) || '').replace(/\/$/, '');
+
+    if (!url)     { setStatus('Paste a video URL first.', 'error'); return; }
+    if (!backend) { setStatus('Add your Render backend URL in the field below first.', 'error'); return; }
+
+    btn.disabled    = true;
+    btn.textContent = 'Fetching…';
+    setStatus('Contacting backend…', 'loading');
+
+    try {
+      const res  = await fetch(`${backend}/download`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ url, quality: qualSel.value, mode: modeSel.value }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setStatus(`Error: ${err.detail || res.statusText}`, 'error');
+        return;
+      }
+
+      const blob     = await res.blob();
+      const blobUrl  = URL.createObjectURL(blob);
+      statusEl.style.display = 'none';
+      resultEl.style.display = 'block';
+      dlLink.href    = blobUrl;
+      dlLink.click();
+
+    } catch (e) {
+      setStatus('Could not reach the backend. Is your Render URL correct?', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download';
+    }
+  });
 }
 
 // ── App selector ──────────────────────────────────────────
