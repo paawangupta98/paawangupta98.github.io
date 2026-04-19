@@ -79,9 +79,18 @@ function initTyped(el, texts, speed = 80, pause = 2000) {
 // ── Fade-in observer ─────────────────────────────────────
 function initFadeIn() {
   const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.remove('hidden');
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
   }, { threshold: 0.1 });
-  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+  document.querySelectorAll('.fade-in').forEach(el => {
+    el.classList.add('hidden');
+    obs.observe(el);
+  });
 }
 
 // ── Hamburger menu ───────────────────────────────────────
