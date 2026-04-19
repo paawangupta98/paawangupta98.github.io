@@ -275,35 +275,79 @@ function initNotes() {
   load(activeKey);
 }
 
-// ── YT Downloader ─────────────────────────────────────────
+// ── YT Downloader (Cobalt API) ────────────────────────────
 function initYtDownloader() {
-  const urlInput = document.getElementById('yt-url');
-  const qualitySel = document.getElementById('yt-quality');
-  const formatSel = document.getElementById('yt-format');
-  const cmdOutput = document.getElementById('yt-cmd');
-  const copyBtn = document.getElementById('copy-cmd');
-  if (!urlInput) return;
+  const btn = document.getElementById('yt-download-btn');
+  if (!btn) return;
 
-  function buildCmd() {
-    const url = urlInput.value.trim() || 'https://www.youtube.com/watch?v=...';
-    const quality = qualitySel.value;
-    const fmt = formatSel.value;
-    let cmd;
-    if (fmt === 'mp3') {
-      cmd = `yt-dlp -x --audio-format mp3 "${url}"`;
-    } else if (quality === 'best') {
-      cmd = `yt-dlp -f "bestvideo+bestaudio" --merge-output-format ${fmt} "${url}"`;
-    } else if (quality === 'audio') {
-      cmd = `yt-dlp -f "bestaudio" "${url}"`;
-    } else {
-      cmd = `yt-dlp -f "bestvideo[height<=${quality}]+bestaudio" --merge-output-format ${fmt} "${url}"`;
-    }
-    cmdOutput.textContent = cmd;
+  const urlInput  = document.getElementById('yt-url');
+  const modeSel   = document.getElementById('yt-mode');
+  const qualSel   = document.getElementById('yt-quality');
+  const statusEl  = document.getElementById('yt-status');
+  const resultEl  = document.getElementById('yt-result');
+  const dlLink    = document.getElementById('yt-download-link');
+
+  function setStatus(msg, type) {
+    statusEl.style.display = 'block';
+    resultEl.style.display = 'none';
+    const colors = {
+      loading: 'rgba(255,255,255,0.05)',
+      error:   'rgba(239,68,68,0.08)',
+    };
+    const borders = {
+      loading: 'rgba(255,255,255,0.1)',
+      error:   'rgba(239,68,68,0.3)',
+    };
+    statusEl.style.background = colors[type] || colors.loading;
+    statusEl.style.border = `1px solid ${borders[type] || borders.loading}`;
+    statusEl.style.color = type === 'error' ? '#f87171' : 'var(--text-2)';
+    statusEl.textContent = msg;
   }
 
-  [urlInput, qualitySel, formatSel].forEach(el => el?.addEventListener('input', buildCmd));
-  copyBtn?.addEventListener('click', () => copyText(cmdOutput.textContent));
-  buildCmd();
+  function showResult(url) {
+    statusEl.style.display = 'none';
+    resultEl.style.display = 'block';
+    dlLink.href = url;
+  }
+
+  btn.addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+    if (!url) { setStatus('Please paste a video URL first.', 'error'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Fetching…';
+    setStatus('Contacting cobalt.tools…', 'loading');
+
+    try {
+      const res = await fetch('https://api.cobalt.tools/', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url,
+          downloadMode:  modeSel.value,
+          videoQuality:  qualSel.value,
+          audioFormat:   'mp3',
+          filenameStyle: 'pretty',
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.status === 'tunnel' || data.status === 'redirect') {
+        showResult(data.url);
+      } else if (data.status === 'picker') {
+        showResult(data.picker[0].url);
+      } else {
+        const msg = data.error?.code || 'Unknown error from cobalt.';
+        setStatus(`Error: ${msg}`, 'error');
+      }
+    } catch (e) {
+      setStatus('Could not reach cobalt.tools. Check your connection or try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download';
+    }
+  });
 }
 
 // ── App selector ──────────────────────────────────────────

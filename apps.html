@@ -71,49 +71,55 @@
     <div class="app-panel" id="app-ytdl">
       <div style="margin-bottom:1.5rem;">
         <h2 style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:1px;margin-bottom:0.4rem;">YouTube Downloader</h2>
-        <p style="color:var(--text-2);font-size:0.9rem;">Paste a YouTube URL and get the exact <code style="color:var(--red);background:var(--bg-3);padding:0.1rem 0.4rem;border-radius:3px;">yt-dlp</code> command to run locally.</p>
+        <p style="color:var(--text-2);font-size:0.9rem;">Paste a URL, pick quality, hit Download. Works on YouTube, Instagram, Twitter/X, TikTok &amp; more.</p>
       </div>
 
       <div class="yt-form">
         <div class="form-group">
-          <label class="form-label">YouTube URL</label>
+          <label class="form-label">Video URL</label>
           <input id="yt-url" class="form-input" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" spellcheck="false" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
+            <label class="form-label">Mode</label>
+            <select id="yt-mode" class="form-select">
+              <option value="auto">Video + Audio</option>
+              <option value="audio">Audio Only</option>
+              <option value="mute">Video Only (no audio)</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label class="form-label">Quality</label>
             <select id="yt-quality" class="form-select">
-              <option value="best">Best Available</option>
+              <option value="max">Best Available</option>
               <option value="1080">1080p</option>
               <option value="720">720p</option>
               <option value="480">480p</option>
               <option value="360">360p</option>
-              <option value="audio">Audio Only</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Format</label>
-            <select id="yt-format" class="form-select">
-              <option value="mp4">MP4</option>
-              <option value="webm">WebM</option>
-              <option value="mkv">MKV</option>
-              <option value="mp3">MP3 (audio)</option>
             </select>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Generated Command</label>
-          <div class="cmd-output" id="yt-cmd" style="position:relative;padding-right:80px;">
-            yt-dlp -f "bestvideo+bestaudio" --merge-output-format mp4 "..."
-            <button class="cmd-copy" id="copy-cmd">Copy</button>
-          </div>
+        <button class="btn btn-primary" id="yt-download-btn" style="width:100%;justify-content:center;font-size:1rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </button>
+
+        <!-- Status / result -->
+        <div id="yt-status" style="display:none;border-radius:8px;padding:1rem 1.25rem;font-size:0.9rem;line-height:1.6;"></div>
+
+        <div id="yt-result" style="display:none;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:8px;padding:1.25rem;text-align:center;">
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1.5px;text-transform:uppercase;color:#4ade80;margin-bottom:0.75rem;">Ready to Download</div>
+          <a id="yt-download-link" href="#" target="_blank" rel="noopener" class="btn btn-primary" style="display:inline-flex;justify-content:center;text-decoration:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Click to Save File
+          </a>
+          <p style="color:var(--text-3);font-size:0.75rem;margin-top:0.75rem;">If the download doesn't start, right-click → Save Link As</p>
         </div>
 
-        <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:0.9rem 1.1rem;font-size:0.83rem;color:var(--text-2);line-height:1.6;">
-          <strong style="color:var(--gold);">Requirements:</strong> Install <a href="https://github.com/yt-dlp/yt-dlp" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">yt-dlp</a> and <a href="https://ffmpeg.org" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">ffmpeg</a> on your machine.<br>
-          Install: <code style="color:var(--gold);">pip install yt-dlp</code> &nbsp;|&nbsp; <code style="color:var(--gold);">brew install ffmpeg</code>
+        <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:0.9rem 1.1rem;font-size:0.82rem;color:var(--text-2);line-height:1.6;">
+          <strong style="color:var(--gold);">Powered by</strong> <a href="https://cobalt.tools" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">cobalt.tools</a> — open-source, no ads, no tracking.
         </div>
       </div>
     </div>
