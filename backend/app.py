@@ -2,7 +2,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-import yt_dlp, httpx, os, tempfile, atexit
+import yt_dlp, httpx, os, tempfile, atexit, static_ffmpeg
+
+# Add ffmpeg to PATH (installed via pip, no root needed)
+static_ffmpeg.add_paths()
 
 app = FastAPI()
 
