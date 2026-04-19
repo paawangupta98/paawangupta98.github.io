@@ -275,87 +275,45 @@ function initNotes() {
   load(activeKey);
 }
 
-// ── YT Downloader (Invidious API) ────────────────────────
+// ── YT Downloader ────────────────────────────────────────
 function initYtDownloader() {
-  const btn = document.getElementById('yt-download-btn');
-  if (!btn) return;
-
   const urlInput  = document.getElementById('yt-url');
-  const statusEl  = document.getElementById('yt-status');
-  const formatsEl = document.getElementById('yt-formats');
-  const listEl    = document.getElementById('yt-format-list');
+  const qualSel   = document.getElementById('yt-quality');
+  const fmtSel    = document.getElementById('yt-format');
+  const cmdText   = document.getElementById('yt-cmd-text');
+  const copyBtn   = document.getElementById('copy-cmd');
+  const cobaltBtn = document.getElementById('yt-cobalt-btn');
+  if (!urlInput) return;
 
-  const INSTANCES = [
-    'https://inv.nadeko.net',
-    'https://invidious.privacydev.net',
-    'https://iv.gg',
-    'https://invidious.nerdvpn.de',
-  ];
-
-  function extractId(url) {
-    const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    return m ? m[1] : null;
-  }
-
-  function setStatus(msg, type) {
-    statusEl.style.display = 'block';
-    formatsEl.style.display = 'none';
-    statusEl.style.background = type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.04)';
-    statusEl.style.border     = `1px solid ${type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}`;
-    statusEl.style.color      = type === 'error' ? '#f87171' : 'var(--text-2)';
-    statusEl.textContent = msg;
-  }
-
-  async function fetchInfo(videoId) {
-    for (const inst of INSTANCES) {
-      try {
-        const res = await fetch(`${inst}/api/v1/videos/${videoId}`, { headers: { Accept: 'application/json' } });
-        if (res.ok) return { data: await res.json(), inst };
-      } catch { /* try next */ }
+  function buildCmd() {
+    const url     = urlInput.value.trim() || 'YOUR_URL_HERE';
+    const quality = qualSel?.value || 'best';
+    const fmt     = fmtSel?.value  || 'mp4';
+    let cmd;
+    if (quality === 'audio') {
+      cmd = `yt-dlp -x --audio-format mp3 "${url}"`;
+    } else if (quality === 'best') {
+      cmd = `yt-dlp -f "bestvideo+bestaudio" --merge-output-format ${fmt} "${url}"`;
+    } else {
+      cmd = `yt-dlp -f "bestvideo[height<=${quality}]+bestaudio" --merge-output-format ${fmt} "${url}"`;
     }
-    throw new Error('All instances unreachable');
+    if (cmdText) cmdText.textContent = cmd;
   }
 
-  btn.addEventListener('click', async () => {
-    const url     = urlInput.value.trim();
-    const videoId = extractId(url);
+  urlInput.addEventListener('input', buildCmd);
+  qualSel?.addEventListener('change', buildCmd);
+  fmtSel?.addEventListener('change', buildCmd);
+  copyBtn?.addEventListener('click', () => copyText(cmdText?.textContent || ''));
 
-    if (!url)     { setStatus('Paste a YouTube URL first.', 'error'); return; }
-    if (!videoId) { setStatus('Not a valid YouTube URL — couldn\'t find a video ID.', 'error'); return; }
-
-    btn.disabled = true;
-    btn.textContent = 'Fetching…';
-    setStatus('Connecting to Invidious…', 'loading');
-    listEl.innerHTML = '';
-
-    try {
-      const { data, inst } = await fetchInfo(videoId);
-      const formats = (data.formatStreams || []).reverse(); // best quality first
-
-      if (!formats.length) { setStatus('No downloadable formats found for this video.', 'error'); return; }
-
-      statusEl.style.display = 'none';
-      formatsEl.style.display = 'block';
-
-      formats.forEach(f => {
-        const a = document.createElement('a');
-        a.href     = `${inst}/latest_version?id=${videoId}&itag=${f.itag}&local=true`;
-        a.target   = '_blank';
-        a.rel      = 'noopener';
-        a.download = '';
-        a.className = 'btn btn-outline';
-        a.style.cssText = 'text-decoration:none;font-size:0.85rem;';
-        a.textContent = f.qualityLabel || f.quality;
-        listEl.appendChild(a);
-      });
-
-    } catch (e) {
-      setStatus('Could not reach any Invidious instance. Try again in a moment.', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Get Download Links';
-    }
+  cobaltBtn?.addEventListener('click', () => {
+    const url = urlInput.value.trim();
+    if (!url) { showToast('Paste a URL first'); return; }
+    copyText(url);
+    showToast('URL copied! Paste it on cobalt.tools');
+    setTimeout(() => window.open('https://cobalt.tools', '_blank', 'noopener'), 600);
   });
+
+  buildCmd();
 }
 
 // ── App selector ──────────────────────────────────────────

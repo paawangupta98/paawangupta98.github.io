@@ -547,7 +547,7 @@ footer a { color: var(--red); text-decoration: none; }
 .app-panel.active { display: block; }
 
 /* YouTube Downloader */
-.yt-form { display: flex; flex-direction: column; gap: 1.25rem; max-width: 640px; }
+.yt-form { display: flex; flex-direction: column; gap: 1.25rem; max-width: 680px; }
 
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
 .form-label {
