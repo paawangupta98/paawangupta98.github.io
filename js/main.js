@@ -286,42 +286,53 @@ function initYtDownloader() {
   const statusEl  = document.getElementById('yt-status');
   const resultEl  = document.getElementById('yt-result');
   const dlLink    = document.getElementById('yt-download-link');
+  const apiKeyEl  = document.getElementById('yt-api-key');
+  const saveKeyBtn = document.getElementById('yt-save-key');
+
+  const KEY_STORE = 'cobalt_api_key';
+
+  function loadKey() {
+    const k = localStorage.getItem(KEY_STORE) || '';
+    if (apiKeyEl) apiKeyEl.value = k;
+    return k;
+  }
+
+  saveKeyBtn?.addEventListener('click', () => {
+    const k = apiKeyEl.value.trim();
+    if (!k) { showToast('Paste your API key first'); return; }
+    localStorage.setItem(KEY_STORE, k);
+    showToast('API key saved!');
+  });
 
   function setStatus(msg, type) {
     statusEl.style.display = 'block';
     resultEl.style.display = 'none';
-    const colors = {
-      loading: 'rgba(255,255,255,0.05)',
-      error:   'rgba(239,68,68,0.08)',
-    };
-    const borders = {
-      loading: 'rgba(255,255,255,0.1)',
-      error:   'rgba(239,68,68,0.3)',
-    };
-    statusEl.style.background = colors[type] || colors.loading;
-    statusEl.style.border = `1px solid ${borders[type] || borders.loading}`;
+    statusEl.style.background = type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.04)';
+    statusEl.style.border = `1px solid ${type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}`;
     statusEl.style.color = type === 'error' ? '#f87171' : 'var(--text-2)';
     statusEl.textContent = msg;
   }
 
-  function showResult(url) {
-    statusEl.style.display = 'none';
-    resultEl.style.display = 'block';
-    dlLink.href = url;
-  }
-
   btn.addEventListener('click', async () => {
     const url = urlInput.value.trim();
+    const apiKey = loadKey();
+
     if (!url) { setStatus('Please paste a video URL first.', 'error'); return; }
+    if (!apiKey) { setStatus('Add your Cobalt API key above first — it\'s free at cobalt.tools.', 'error'); return; }
 
     btn.disabled = true;
     btn.textContent = 'Fetching…';
     setStatus('Contacting cobalt.tools…', 'loading');
+    resultEl.style.display = 'none';
 
     try {
       const res = await fetch('https://api.cobalt.tools/', {
         method: 'POST',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Api-Key ${apiKey}`,
+        },
         body: JSON.stringify({
           url,
           downloadMode:  modeSel.value,
@@ -334,20 +345,25 @@ function initYtDownloader() {
       const data = await res.json();
 
       if (data.status === 'tunnel' || data.status === 'redirect') {
-        showResult(data.url);
+        statusEl.style.display = 'none';
+        resultEl.style.display = 'block';
+        dlLink.href = data.url;
       } else if (data.status === 'picker') {
-        showResult(data.picker[0].url);
+        statusEl.style.display = 'none';
+        resultEl.style.display = 'block';
+        dlLink.href = data.picker[0].url;
       } else {
-        const msg = data.error?.code || 'Unknown error from cobalt.';
-        setStatus(`Error: ${msg}`, 'error');
+        setStatus(`Error: ${data.error?.code || 'Unknown error from cobalt.'}`, 'error');
       }
     } catch (e) {
-      setStatus('Could not reach cobalt.tools. Check your connection or try again.', 'error');
+      setStatus('Could not reach cobalt.tools. Check your connection and try again.', 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download';
     }
   });
+
+  loadKey();
 }
 
 // ── App selector ──────────────────────────────────────────

@@ -71,7 +71,19 @@
     <div class="app-panel" id="app-ytdl">
       <div style="margin-bottom:1.5rem;">
         <h2 style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:1px;margin-bottom:0.4rem;">YouTube Downloader</h2>
-        <p style="color:var(--text-2);font-size:0.9rem;">Paste a URL, pick quality, hit Download. Works on YouTube, Instagram, Twitter/X, TikTok &amp; more.</p>
+        <p style="color:var(--text-2);font-size:0.9rem;">Works on YouTube, Instagram, Twitter/X, TikTok &amp; more — powered by <a href="https://cobalt.tools" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">cobalt.tools</a>.</p>
+      </div>
+
+      <!-- API Key setup -->
+      <div id="yt-key-section" style="margin-bottom:1.5rem;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:1rem 1.25rem;">
+        <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">Cobalt API Key</div>
+        <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+          <input id="yt-api-key" class="form-input" type="password" placeholder="Paste your Cobalt API key…" style="flex:1;min-width:200px;" autocomplete="off" />
+          <button class="btn btn-outline" id="yt-save-key" style="white-space:nowrap;">Save Key</button>
+        </div>
+        <p style="font-size:0.78rem;color:var(--text-3);margin-top:0.6rem;">
+          Get a free key at <a href="https://cobalt.tools" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">cobalt.tools</a> → sign in → API → Generate key. Saved locally in your browser only.
+        </p>
       </div>
 
       <div class="yt-form">
@@ -106,7 +118,6 @@
           Download
         </button>
 
-        <!-- Status / result -->
         <div id="yt-status" style="display:none;border-radius:8px;padding:1rem 1.25rem;font-size:0.9rem;line-height:1.6;"></div>
 
         <div id="yt-result" style="display:none;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.25);border-radius:8px;padding:1.25rem;text-align:center;">
@@ -115,11 +126,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Click to Save File
           </a>
-          <p style="color:var(--text-3);font-size:0.75rem;margin-top:0.75rem;">If the download doesn't start, right-click → Save Link As</p>
-        </div>
-
-        <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:0.9rem 1.1rem;font-size:0.82rem;color:var(--text-2);line-height:1.6;">
-          <strong style="color:var(--gold);">Powered by</strong> <a href="https://cobalt.tools" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">cobalt.tools</a> — open-source, no ads, no tracking.
+          <p style="color:var(--text-3);font-size:0.75rem;margin-top:0.75rem;">If download doesn't start, right-click → Save Link As</p>
         </div>
       </div>
     </div>
