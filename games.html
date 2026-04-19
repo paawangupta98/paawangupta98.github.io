@@ -134,17 +134,17 @@
     <p class="section-desc fade-in">Browser-based games to kill time. All local — no server, no ads.</p>
 
     <div class="apps-selector fade-in">
-      <div class="app-card" data-app="puzzle">
+      <div class="app-card" data-app="puzzle" onclick="(function(){var cards=[...document.querySelectorAll('.app-card')],panels=[...document.querySelectorAll('.app-panel')];cards.forEach(function(c){c.classList.remove('selected')});panels.forEach(function(p){p.style.cssText='display:none !important'});this.classList.add('selected');var panel=document.getElementById('app-puzzle');if(panel)panel.style.cssText='display:block !important'}).call(this)">
         <div class="app-icon">🧩</div>
         <div class="app-name">Sliding Puzzle</div>
         <div class="app-desc">15-tile sliding puzzle</div>
       </div>
-      <div class="app-card" data-app="sudoku">
+      <div class="app-card" data-app="sudoku" onclick="(function(){var cards=[...document.querySelectorAll('.app-card')],panels=[...document.querySelectorAll('.app-panel')];cards.forEach(function(c){c.classList.remove('selected')});panels.forEach(function(p){p.style.cssText='display:none !important'});this.classList.add('selected');var panel=document.getElementById('app-sudoku');if(panel)panel.style.cssText='display:block !important'}).call(this)">
         <div class="app-icon">🔢</div>
         <div class="app-name">Sudoku</div>
         <div class="app-desc">Classic 9×9 Sudoku</div>
       </div>
-      <div class="app-card" data-app="kbc">
+      <div class="app-card" data-app="kbc" onclick="(function(){var cards=[...document.querySelectorAll('.app-card')],panels=[...document.querySelectorAll('.app-panel')];cards.forEach(function(c){c.classList.remove('selected')});panels.forEach(function(p){p.style.cssText='display:none !important'});this.classList.add('selected');var panel=document.getElementById('app-kbc');if(panel)panel.style.cssText='display:block !important'}).call(this)">
         <div class="app-icon">💰</div>
         <div class="app-name">KBC</div>
         <div class="app-desc">Kaun Banega Crorepati</div>

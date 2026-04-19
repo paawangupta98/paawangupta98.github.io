@@ -49,17 +49,17 @@
 
     <!-- App selector cards -->
     <div class="apps-selector fade-in">
-      <div class="app-card" data-app="ytdl">
+      <div class="app-card" data-app="ytdl" onclick="(function(){var cards=[...document.querySelectorAll('.app-card')],panels=[...document.querySelectorAll('.app-panel')];cards.forEach(function(c){c.classList.remove('selected')});panels.forEach(function(p){p.style.cssText='display:none !important'});this.classList.add('selected');var panel=document.getElementById('app-ytdl');if(panel)panel.style.cssText='display:block !important'}).call(this)">
         <div class="app-icon">📥</div>
         <div class="app-name">YT Downloader</div>
         <div class="app-desc">Generate yt-dlp commands</div>
       </div>
-      <div class="app-card" data-app="converter">
+      <div class="app-card" data-app="converter" onclick="(function(){var cards=[...document.querySelectorAll('.app-card')],panels=[...document.querySelectorAll('.app-panel')];cards.forEach(function(c){c.classList.remove('selected')});panels.forEach(function(p){p.style.cssText='display:none !important'});this.classList.add('selected');var panel=document.getElementById('app-converter');if(panel)panel.style.cssText='display:block !important'}).call(this)">
         <div class="app-icon">⚖</div>
         <div class="app-name">Unit Converter</div>
         <div class="app-desc">Length, weight, temp &amp; more</div>
       </div>
-      <div class="app-card" data-app="notes">
+      <div class="app-card" data-app="notes" onclick="(function(){var cards=[...document.querySelectorAll('.app-card')],panels=[...document.querySelectorAll('.app-panel')];cards.forEach(function(c){c.classList.remove('selected')});panels.forEach(function(p){p.style.cssText='display:none !important'});this.classList.add('selected');var panel=document.getElementById('app-notes');if(panel)panel.style.cssText='display:block !important'}).call(this)">
         <div class="app-icon">📝</div>
         <div class="app-name">Quick Notes</div>
         <div class="app-desc">Clipboard across devices</div>

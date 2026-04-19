@@ -337,22 +337,25 @@ function initYtDownloader() {
 
 // ── App selector ──────────────────────────────────────────
 function initAppSelector() {
-  const cards = document.querySelectorAll('.app-card');
-  const panels = document.querySelectorAll('.app-panel');
+  const cards  = [...document.querySelectorAll('.app-card')];
+  const panels = [...document.querySelectorAll('.app-panel')];
   if (!cards.length) return;
 
-  function showApp(appId) {
-    cards.forEach(c => c.classList.remove('selected'));
-    panels.forEach(p => { p.style.display = 'none'; });
+  // Force-hide all panels upfront
+  panels.forEach(p => { p.style.cssText = 'display:none !important'; });
 
-    const targetCard = document.querySelector(`.app-card[data-app="${appId}"]`);
-    const targetPanel = document.getElementById(`app-${appId}`);
-    if (targetCard) targetCard.classList.add('selected');
-    if (targetPanel) targetPanel.style.display = 'block';
+  function showApp(id) {
+    cards.forEach(c => c.classList.remove('selected'));
+    panels.forEach(p => { p.style.cssText = 'display:none !important'; });
+    const card  = document.querySelector(`.app-card[data-app="${id}"]`);
+    const panel = document.getElementById(`app-${id}`);
+    if (card)  card.classList.add('selected');
+    if (panel) panel.style.cssText = 'display:block !important';
   }
 
-  cards.forEach(card => {
-    card.addEventListener('click', () => showApp(card.dataset.app));
+  cards.forEach(c => {
+    c.style.cursor = 'pointer';
+    c.onclick = function() { showApp(this.dataset.app); };
   });
 
   showApp(cards[0].dataset.app);
