@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apps — Paawan Gupta</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23e23636'/><text y='.9em' font-size='72' font-family='Arial Black' fill='white' x='12'>P</text></svg>" />
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-mark">PG</span>
+      PAAWAN GUPTA
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="apps.html" class="active">Apps</a></li>
+      <li><a href="projects.html">Projects</a></li>
+      <li><a href="resume.html">Resume</a></li>
+      <li><a href="blog.html">Blog</a></li>
+    </ul>
+    <a href="https://github.com/paawangupta98" target="_blank" class="nav-github" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+      GitHub
+    </a>
+    <div class="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="apps.html" class="active">Apps</a>
+  <a href="projects.html">Projects</a>
+  <a href="resume.html">Resume</a>
+  <a href="blog.html">Blog</a>
+</div>
+
+<main class="page">
+  <section class="section">
+    <div class="section-label">Apps Arsenal</div>
+    <h1 class="section-title fade-in">My Web Tools</h1>
+    <p class="section-desc fade-in">
+      A collection of browser-based utilities I use across devices — no install required, works on mobile and desktop.
+    </p>
+
+    <!-- App selector cards -->
+    <div class="apps-selector fade-in">
+      <div class="app-card" data-app="ytdl">
+        <div class="app-icon">📥</div>
+        <div class="app-name">YT Downloader</div>
+        <div class="app-desc">Generate yt-dlp commands</div>
+      </div>
+      <div class="app-card" data-app="converter">
+        <div class="app-icon">⚖</div>
+        <div class="app-name">Unit Converter</div>
+        <div class="app-desc">Length, weight, temp &amp; more</div>
+      </div>
+      <div class="app-card" data-app="notes">
+        <div class="app-icon">📝</div>
+        <div class="app-name">Quick Notes</div>
+        <div class="app-desc">Clipboard across devices</div>
+      </div>
+    </div>
+
+    <!-- ─── YouTube Downloader ─── -->
+    <div class="app-panel" id="app-ytdl">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:1px;margin-bottom:0.4rem;">YouTube Downloader</h2>
+        <p style="color:var(--text-2);font-size:0.9rem;">Paste a YouTube URL and get the exact <code style="color:var(--red);background:var(--bg-3);padding:0.1rem 0.4rem;border-radius:3px;">yt-dlp</code> command to run locally.</p>
+      </div>
+
+      <div class="yt-form">
+        <div class="form-group">
+          <label class="form-label">YouTube URL</label>
+          <input id="yt-url" class="form-input" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" spellcheck="false" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Quality</label>
+            <select id="yt-quality" class="form-select">
+              <option value="best">Best Available</option>
+              <option value="1080">1080p</option>
+              <option value="720">720p</option>
+              <option value="480">480p</option>
+              <option value="360">360p</option>
+              <option value="audio">Audio Only</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Format</label>
+            <select id="yt-format" class="form-select">
+              <option value="mp4">MP4</option>
+              <option value="webm">WebM</option>
+              <option value="mkv">MKV</option>
+              <option value="mp3">MP3 (audio)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Generated Command</label>
+          <div class="cmd-output" id="yt-cmd" style="position:relative;padding-right:80px;">
+            yt-dlp -f "bestvideo+bestaudio" --merge-output-format mp4 "..."
+            <button class="cmd-copy" id="copy-cmd">Copy</button>
+          </div>
+        </div>
+
+        <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:0.9rem 1.1rem;font-size:0.83rem;color:var(--text-2);line-height:1.6;">
+          <strong style="color:var(--gold);">Requirements:</strong> Install <a href="https://github.com/yt-dlp/yt-dlp" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">yt-dlp</a> and <a href="https://ffmpeg.org" target="_blank" style="color:var(--red);text-decoration:none;" rel="noopener">ffmpeg</a> on your machine.<br>
+          Install: <code style="color:var(--gold);">pip install yt-dlp</code> &nbsp;|&nbsp; <code style="color:var(--gold);">brew install ffmpeg</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Unit Converter ─── -->
+    <div class="app-panel" id="app-converter">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:1px;margin-bottom:0.4rem;">Unit Converter</h2>
+        <p style="color:var(--text-2);font-size:0.9rem;">Instant conversion across 7 categories. Works offline.</p>
+      </div>
+
+      <div class="category-tabs">
+        <button class="category-tab active" data-cat="Length">Length</button>
+        <button class="category-tab" data-cat="Weight">Weight</button>
+        <button class="category-tab" data-cat="Temperature">Temp</button>
+        <button class="category-tab" data-cat="Area">Area</button>
+        <button class="category-tab" data-cat="Volume">Volume</button>
+        <button class="category-tab" data-cat="Speed">Speed</button>
+        <button class="category-tab" data-cat="Time">Time</button>
+      </div>
+
+      <div class="converter-grid">
+        <div class="form-group">
+          <label class="form-label">From</label>
+          <select id="from-unit" class="form-select"></select>
+          <input id="from-val" class="form-input" type="number" value="1" style="margin-top:0.5rem;" />
+        </div>
+
+        <button id="swap-units" class="swap-btn" title="Swap units">⇄</button>
+
+        <div class="form-group">
+          <label class="form-label">To</label>
+          <select id="to-unit" class="form-select"></select>
+          <div class="form-input" style="margin-top:0.5rem;display:flex;align-items:center;font-size:0.95rem;color:var(--text-2);cursor:default;background:var(--bg-0);" id="to-preview">—</div>
+        </div>
+      </div>
+
+      <div class="result-display">
+        <div class="result-value" id="result-val">—</div>
+        <div class="result-unit" id="result-unit">Enter a value above</div>
+      </div>
+    </div>
+
+    <!-- ─── Quick Notes ─── -->
+    <div class="app-panel" id="app-notes">
+      <div style="margin-bottom:1.25rem;">
+        <h2 style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:1px;margin-bottom:0.4rem;">Quick Notes</h2>
+        <p style="color:var(--text-2);font-size:0.9rem;">3 independent note pads. Auto-saved to browser storage — no account needed.</p>
+      </div>
+
+      <div class="notes-tabs">
+        <button class="note-tab active" data-note="1">Note 1</button>
+        <button class="note-tab" data-note="2">Note 2</button>
+        <button class="note-tab" data-note="3">Note 3</button>
+      </div>
+
+      <div class="notes-toolbar">
+        <button class="notes-btn" id="copy-notes">Copy All</button>
+        <button class="notes-btn" id="download-notes">Download</button>
+        <button class="notes-btn danger" id="clear-notes">Clear</button>
+        <span class="notes-meta" id="char-count">0 chars</span>
+      </div>
+
+      <textarea class="notes-textarea" id="notes-area" placeholder="Start typing... notes are saved automatically to your browser."></textarea>
+
+      <div style="margin-top:0.75rem;font-size:0.78rem;color:var(--text-3);font-family:'Rajdhani',sans-serif;letter-spacing:0.5px;">
+        Notes are stored locally in your browser (localStorage). They persist across sessions on the same device.
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Built with ❤ by <a href="index.html">Paawan Gupta</a> &nbsp;·&nbsp; Hosted on GitHub Pages</p>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
