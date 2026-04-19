@@ -82,5 +82,5 @@ def _build_format(quality: str, mode: str) -> str:
     if mode == "audio" or quality == "audio":
         return "bestaudio[ext=m4a]/bestaudio/best"
     if quality == "best":
-        return "best[ext=mp4]/best[ext=webm]/best"
-    return f"best[height<={quality}][ext=mp4]/best[height<={quality}]/best"
+        return "bestvideo+bestaudio/best[ext=mp4]/best"
+    return f"bestvideo[height<={quality}]+bestaudio/best[height<={quality}][ext=mp4]/best"
